@@ -1,18 +1,24 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const mysql = require("mysql");
-const crypto = require("crypto"); // ใช้ crypto เพื่อคอมพิวเตอร์ MD5
+const crypto = require("crypto");
 const cors = require("cors");
+const multer = require("multer");
+const fetch = require("node-fetch"); // ใช้ fetch แทน axios
+const fs = require("fs");
+const path = require("path");
+const FormData = require("form-data");
+
 const app = express();
 const port = 3000;
 
-app.use(
-  cors({
-    origin: "*",
-  })
-);
+app.use(cors({ origin: "*" }));
 app.use(bodyParser.json());
 
+// ตั้งค่าการอัปโหลดไฟล์โดยใช้ multer
+const upload = multer({ dest: "uploads/" });
+
+// ตั้งค่าการเชื่อมต่อฐานข้อมูล MySQL
 const db = mysql.createConnection({
   host: "localhost",
   user: "root",
@@ -28,10 +34,12 @@ db.connect((err) => {
   console.log("MySQL connected...");
 });
 
+// ฟังก์ชัน hash MD5 สำหรับการเข้ารหัสรหัสผ่าน
 function hashMD5(password) {
   return crypto.createHash("md5").update(password).digest("hex");
 }
 
+// Endpoint สำหรับลงทะเบียน
 app.post("/signin", (req, res) => {
   const { username, password, email } = req.body;
 
@@ -48,16 +56,19 @@ app.post("/signin", (req, res) => {
   db.query(query, [username, hashedPassword, email], (err, result) => {
     if (err) {
       console.error("Error during user registration:", err);
-      return res.status(500).send({
-        status: "error",
-        message: "User registration failed",
-        error: err.message,
-      });
+      return res
+        .status(500)
+        .send({
+          status: "error",
+          message: "User registration failed",
+          error: err.message,
+        });
     }
     res.send({ status: "success", message: "User registered successfully" });
   });
 });
 
+// Endpoint สำหรับเข้าสู่ระบบ
 app.post("/login", (req, res) => {
   const { username, password } = req.body;
 
@@ -73,11 +84,13 @@ app.post("/login", (req, res) => {
   db.query(query, [username], (err, results) => {
     if (err) {
       console.error("Error during user login:", err);
-      return res.status(500).send({
-        status: "error",
-        message: "An error occurred during login",
-        error: err.message,
-      });
+      return res
+        .status(500)
+        .send({
+          status: "error",
+          message: "An error occurred during login",
+          error: err.message,
+        });
     }
     if (results.length === 0) {
       return res
@@ -94,14 +107,77 @@ app.post("/login", (req, res) => {
   });
 });
 
-app.use((err, req, res, next) => {
-  console.error("Server error:", err);
-  res.status(500).send({
-    status: "error",
-    message: "An internal server error occurred",
-    error: err.message,
-  });
+// ฟังก์ชันส่งภาพไปยัง Flask API
+async function sendImageForPrediction(imagePath) {
+  const formData = new FormData();
+  formData.append("image", fs.createReadStream(imagePath));
+
+  try {
+    const response = await fetch("http://127.0.0.1:5000/predict", {
+      method: "POST",
+      body: formData,
+      headers: formData.getHeaders(), // เพิ่ม headers ของ formData
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error in Flask API: ${response.statusText}`);
+    }
+
+    const result = await response.json();
+    return result.predictions;
+  } catch (error) {
+    console.error("Error sending image to Flask API:", error);
+    throw error;
+  }
+}
+
+// Endpoint สำหรับการอัปโหลดและทำนายภาพ
+app.post("/upload", upload.single("image"), async (req, res) => {
+  if (!req.file) {
+    return res
+      .status(400)
+      .send({ status: "error", message: "No file uploaded" });
+  }
+
+  const imagePath = path.join(__dirname, req.file.path);
+
+  try {
+    const predictionResults = await sendImageForPrediction(imagePath);
+    const predictionClass = predictionResults[0].class;
+
+    const query = `INSERT INTO image (image_name, prediction_result) VALUES (?, ?)`;
+    db.query(query, [req.file.filename, predictionClass], (err, result) => {
+      if (err) {
+        console.error("Error inserting into database:", err);
+        return res
+          .status(500)
+          .send({ status: "error", message: "Error saving image data to database" });
+      }
+      console.log("Image data inserted into database");
+    });
+
+    // ตรวจสอบว่ามีไฟล์อยู่ก่อนทำการลบ
+    if (fs.existsSync(imagePath)) {
+      fs.unlinkSync(imagePath);  // ลบไฟล์หลังจากใช้งานเสร็จ
+    } else {
+      console.warn(`File not found: ${imagePath}`);
+    }
+
+    return res.send({
+      status: "success",
+      message: "Prediction completed",
+      predictions: predictionResults,
+    });
+  } catch (error) {
+    console.error("Error predicting image:", error);
+    return res.status(500).send({
+      status: "error",
+      message: "Error predicting image",
+      error: error.message,
+    });
+  }
 });
+
 
 app.listen(port, "0.0.0.0", () => {
   console.log(`Server running on port ${port}`);
