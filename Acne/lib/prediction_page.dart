@@ -26,7 +26,7 @@ class _PredictionPageState extends State<PredictionPage> {
     });
 
     try {
-      String url = 'http://192.168.0.253:3000/upload';
+      String url = 'http://localhost:3000/upload';
       FormData formData = FormData.fromMap({
         'image': await MultipartFile.fromFile(
           imageFile.path,
