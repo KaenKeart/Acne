@@ -14,7 +14,8 @@ dependencies:
   permission_handler: ^11.2.0  # เพิ่มแพคเกจสำหรับการจัดการอนุญาต
   cupertino_icons: ^1.0.6
   url_launcher: ^6.1.5  # เพิ่มแพ็กเกจ url_launcher
-
+  dio: ^5.0.0
+  
 dev_dependencies:
   flutter_test:
     sdk: flutter
