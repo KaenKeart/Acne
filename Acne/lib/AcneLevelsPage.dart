@@ -108,18 +108,12 @@ class AcneLevelsPage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              'สิวระดับเล็กน้อย (Mild Acne):\n'
-              'มีลักษณะเป็นสิวอุดตัน เช่น สิวหัวดำและสิวหัวขาว ซึ่งมักไม่ทำให้เกิดอาการเจ็บหรืออักเสบมากนัก',
-              style: TextStyle(fontSize: 16),
-            ),
-            const SizedBox(height: 10),
-            const Text(
-              'การรักษาและดูแล:\n'
-              '- ใช้ผลิตภัณฑ์ที่มีส่วนผสมของ เบนโซอิลเพอร์ออกไซด์ (Benzoyl peroxide)\n'
-              '- ใช้กรดซาลิไซลิก (Salicylic acid)\n'
-              '- รักษาความสะอาดของผิวหน้าและหลีกเลี่ยงการสัมผัสหน้าบ่อย ๆ\n'
-              '- ใช้โฟมล้างหน้าที่อ่อนโยนวันละ 2 ครั้งเช้าและเย็น\n'
-              '- รับประทานอาหารที่มีประโยชน์และพักผ่อนให้เพียงพอ',
+              'การรักษาสิวเล็กน้อย (Mild Acne):\n'
+              'สามารถใช้ยาทาเฉพาะที่ เช่น ยาที่มีส่วนประกอบของสารต่าง ๆ ดังนี้:\n'
+              '1. สบู่ล้างหน้า L soap\n'
+              '2. ยาทา Benzoly peroxide 2.5%-5%\n'
+              '3. Ance cream or ance lotion\n'
+              '4. Topical retinoids 0.01%-0.1%',
               style: TextStyle(fontSize: 16),
             ),
           ],
@@ -129,18 +123,14 @@ class AcneLevelsPage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              'สิวระดับปานกลาง (Moderate Acne):\n'
-              'ประกอบด้วยสิวอักเสบที่มีลักษณะเป็นตุ่มแดง (papules) และสิวหัวหนอง (pustules)',
-              style: TextStyle(fontSize: 16),
-            ),
-            const SizedBox(height: 10),
-            const Text(
-              'การรักษาและดูแล:\n'
-              '- ใช้ยาปฏิชีวนะชนิดทาและยาทาเฉพาะที่ เช่น เรตินอยด์ (Retinoids)\n'
-              '- อาจพิจารณาใช้กรดอะเซลาอิก (Azelaic acid)\n'
-              '- ควรหลีกเลี่ยงอาหารที่มีน้ำตาลสูง\n'
-              '- ใช้โฟมล้างหน้าและมอยส์เจอไรเซอร์เพื่อควบคุมความมัน\n'
-              '- หากอาการไม่ดีขึ้น ควรพบแพทย์',
+              'การรักษาสิวปานกลาง (Moderate Acne):\n'
+              'จะพิจารณาให้ยาทาในกลุ่ม mild acne ร่วมกับยารับประทาน ดังนี้:\n'
+              '1. สบู่ล้างหน้า L soap\n'
+              '2. ยาทา Benzoly peroxide 2.5%-5%\n'
+              '3. Ance cream or ance lotion\n'
+              '4. Topical retinoids 0.01%-0.1%\n'
+              '5. Differine\n'
+              '6. ยารับประทาน Doxycycline',
               style: TextStyle(fontSize: 16),
             ),
           ],
@@ -150,19 +140,14 @@ class AcneLevelsPage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              'สิวระดับรุนแรง (Severe Acne):\n'
-              'มีลักษณะเป็นสิวอักเสบขนาดใหญ่ (nodules) หรือสิวซีสต์ (cysts)',
-              style: TextStyle(fontSize: 16),
-            ),
-            const SizedBox(height: 10),
-            const Text(
-              'การรักษาและดูแล:\n'
-              '- ควรพบแพทย์ผิวหนังเพื่อการรักษาที่เหมาะสม\n'
-              '- อาจใช้ยาปฏิชีวนะชนิดรับประทาน และการรักษาอื่น ๆ เช่น Isotretinoin\n'
-              '- ใช้การรักษาแบบเลเซอร์หรือการบำบัดด้วยแสง\n'
-              '- ใช้โฟมล้างหน้าที่มีสารต้านการอักเสบและบำรุงผิว\n'
-              '- รับประทานอาหารที่มีประโยชน์และพักผ่อนให้เพียงพอ\n'
-              '- พบแพทย์หากมีอาการรุนแรง',
+              'การรักษาสิวรุนแรง (Severe Acne):\n'
+              'ในกรณีที่การรักษาไม่ตอบสนอง หรือมีความรุนแรงขึ้นควรปรึกษาแพทย์ผู้เชี่ยวชาญโรคผิวหนัง ดังนี้:\n'
+              '1. สบู่ล้างหน้า L soap\n'
+              '2. ยาทา Benzoly peroxide 2.5%-5%\n'
+              '3. Ance cream or ance lotion\n'
+              '4. Topical retinoids 0.01%-0.1%\n'
+              '5. Differine\n'
+              '6. ยารับประทาน Isotretinoin',
               style: TextStyle(fontSize: 16),
             ),
           ],

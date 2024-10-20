@@ -1,6 +1,7 @@
-import 'package:flutter/material.dart';
 import 'dart:io';
-import 'AcneLevelsPage.dart'; // Import the AcneLevelsPage
+import 'package:flutter/material.dart';
+import 'package:dio/dio.dart';
+import 'package:path/path.dart';
 
 class PredictionPage extends StatefulWidget {
   final File image;
@@ -14,30 +15,44 @@ class PredictionPage extends StatefulWidget {
 class _PredictionPageState extends State<PredictionPage> {
   String? _predictionResult;
   bool _isAnalyzing = false;
+  List<dynamic>? _predictionDetails;
 
-  void _analyzeImage() {
+  Dio dio = Dio();
+
+  Future<void> _analyzeImage(File imageFile) async {
     setState(() {
       _isAnalyzing = true;
       _predictionResult = null;
     });
 
-    // Simulate image analysis (adding delay to simulate process)
-    Future.delayed(const Duration(seconds: 3), () {
+    try {
+      String url = 'http://192.168.0.253:3000/upload';
+      FormData formData = FormData.fromMap({
+        'image': await MultipartFile.fromFile(
+          imageFile.path,
+          filename: basename(imageFile.path),
+        ),
+      });
+
+      Response response = await dio.post(url, data: formData);
+
+      if (response.statusCode == 200 && response.data['status'] == 'success') {
+        setState(() {
+          _isAnalyzing = false;
+          _predictionDetails = response.data['predictions'];
+          _predictionResult = 'การวิเคราะห์เสร็จสิ้น';
+        });
+      } else {
+        setState(() {
+          _isAnalyzing = false;
+          _predictionResult = 'เกิดข้อผิดพลาด: ${response.data['message']}';
+        });
+      }
+    } catch (e) {
       setState(() {
         _isAnalyzing = false;
-        _predictionResult = 'Mild Acne'; // Simulated analysis result
+        _predictionResult = 'เกิดข้อผิดพลาด: $e';
       });
-    });
-  }
-
-  void _showAcneLevelsPage() {
-    if (_predictionResult != null) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => AcneLevelsPage(acneLevel: _predictionResult!),
-        ),
-      );
     }
   }
 
@@ -60,7 +75,7 @@ class _PredictionPageState extends State<PredictionPage> {
         elevation: 0,
         shadowColor: Colors.transparent,
         flexibleSpace: Container(
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             gradient: LinearGradient(
               colors: [
                 Color.fromRGBO(33, 150, 243, 0.8),
@@ -73,7 +88,7 @@ class _PredictionPageState extends State<PredictionPage> {
         ),
       ),
       body: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [
               Color.fromRGBO(33, 150, 243, 0.1),
@@ -92,7 +107,7 @@ class _PredictionPageState extends State<PredictionPage> {
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Container(
-                constraints: BoxConstraints(maxWidth: 360),
+                constraints: const BoxConstraints(maxWidth: 360),
                 padding: const EdgeInsets.all(24.0),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -130,16 +145,16 @@ class _PredictionPageState extends State<PredictionPage> {
                               color: Colors.black.withOpacity(0.5),
                               borderRadius: BorderRadius.circular(20),
                             ),
-                            child: Center(
+                            child: const Center(
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  const CircularProgressIndicator(
+                                  CircularProgressIndicator(
                                     valueColor: AlwaysStoppedAnimation<Color>(
                                         Colors.white),
                                   ),
-                                  const SizedBox(height: 16),
-                                  const Text(
+                                  SizedBox(height: 16),
+                                  Text(
                                     'Analyzing...',
                                     style: TextStyle(
                                       fontSize: 18,
@@ -155,21 +170,22 @@ class _PredictionPageState extends State<PredictionPage> {
                     const SizedBox(height: 20),
                     if (!_isAnalyzing && _predictionResult == null)
                       ElevatedButton(
-                        onPressed: _analyzeImage,
+                        onPressed: () => _analyzeImage(widget.image),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.transparent,
-                          foregroundColor: Color.fromRGBO(33, 150, 243, 1),
-                          padding: EdgeInsets.symmetric(
+                          foregroundColor:
+                              const Color.fromRGBO(33, 150, 243, 1),
+                          padding: const EdgeInsets.symmetric(
                               horizontal: 30, vertical: 15),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
-                            side: BorderSide(
+                            side: const BorderSide(
                                 color: Color.fromRGBO(33, 150, 243, 1)),
                           ),
                           elevation: 6,
                         ).copyWith(
                           shadowColor: MaterialStateProperty.all(
-                            Color.fromRGBO(33, 150, 243, 0.4),
+                            const Color.fromRGBO(33, 150, 243, 0.4),
                           ),
                         ),
                         child: const Text(
@@ -178,11 +194,11 @@ class _PredictionPageState extends State<PredictionPage> {
                         ),
                       ),
                     const SizedBox(height: 20),
-                    if (!_isAnalyzing && _predictionResult != null)
+                    if (_predictionResult != null)
                       Column(
                         children: [
                           Text(
-                            'Prediction Result: $_predictionResult',
+                            _predictionResult ?? '',
                             style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
@@ -190,30 +206,11 @@ class _PredictionPageState extends State<PredictionPage> {
                             ),
                             textAlign: TextAlign.center,
                           ),
-                          const SizedBox(height: 10),
-                          ElevatedButton(
-                            onPressed: _showAcneLevelsPage,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.transparent,
-                              foregroundColor: Colors.green,
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: 30, vertical: 15),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                side: BorderSide(color: Colors.green),
-                              ),
-                              elevation: 6,
-                            ).copyWith(
-                              shadowColor: MaterialStateProperty.all(
-                                Colors.green.withOpacity(0.4),
-                              ),
-                            ),
-                            child: const Text(
-                              'View Detailed Analysis',
-                              style:
-                                  TextStyle(fontSize: 18, color: Colors.white),
-                            ),
-                          ),
+                          if (_predictionDetails != null)
+                            ..._predictionDetails!.map((result) => Text(
+                                  '${result['class']}: ${result['probability']}%',
+                                  style: const TextStyle(fontSize: 16),
+                                )),
                         ],
                       ),
                   ],
